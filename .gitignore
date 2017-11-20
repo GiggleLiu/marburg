@@ -19,3 +19,4 @@ output*
 dist/
 *.mod
 .cache/
+graphs/
