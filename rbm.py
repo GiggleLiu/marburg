@@ -38,7 +38,8 @@ class RBM(nn.Module):
         self.h_bias = nn.Parameter(torch.zeros(n_hin))
 
     def sample_from_p(self, p):
-        return F.relu(torch.sign(p - Variable(torch.rand(p.size()))))
+        rand = Variable(torch.rand(p.size()))
+        return F.relu(torch.sign(p - rand))
 
     def v_to_h(self, v):
         p_h = F.sigmoid(F.linear(v, self.W, self.h_bias))
@@ -119,6 +120,7 @@ def train():
             v, v1 = rbm.forward(sample_data, k=1)
             loss = rbm.free_energy(v) - rbm.free_energy(v1)
             loss_.append(loss.data[0])
+            print(loss_[-1])
             train_op.zero_grad()
             loss.backward()
             train_op.step()
@@ -138,5 +140,5 @@ def test_binary():
 
 
 if __name__ == '__main__':
-    # train()
-    test_binary()
+    train()
+    #test_binary()
