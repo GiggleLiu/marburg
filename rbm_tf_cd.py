@@ -5,7 +5,7 @@ import tensorflow as tf
 from utils import typed_normal, sample_prob, save_img44
 
 class RBM(object):
-    def __init__(self, visible_input, num_hidden, eta=0.01):
+    def __init__(self, visible_input, num_hidden, eta=0.1):
         num_visible = visible_input.get_shape()[1].value
         dtype = visible_input.dtype
 
@@ -15,6 +15,15 @@ class RBM(object):
         self.visible_input = visible_input
 
     def build_graph(self, name, cd_k=1):
+        '''
+        build a graph
+        
+        Args:
+            name (str): specify computational graph name.
+                * free-energy-loss: get the free energy loss F(v_data)-F(v_model).
+                * v-prob: get the probability distribution from visual node.
+            cd_k (int): number of forward-backward iteration in '-loss' graphs.
+        '''
         if name == 'square-loss' or name == 'free-energy-loss':
             # contractive divergence
             p_v = self.visible_input
@@ -31,7 +40,7 @@ class RBM(object):
         elif name == 'v-prob':
             with tf.variable_scope('linear'):
                 linear_out = tf.matmul(self.visible_input, self.weights) + self.hidden_bias
-            return tf.reduce_prod(2*tf.cosh(linear_out))*tf.exp(tf.matmul(self.visible_input, self.visible_bias[:,None],1))
+            return tf.reduce_prod(2*tf.cosh(linear_out))*tf.exp(tf.matmul(self.visible_input, self.visible_bias[:,None]))
         elif name == 'free-energy':
             return self._build_free_energy(self.visible_input)
         else:
@@ -56,8 +65,7 @@ class RBM(object):
         return p_v, sample_v
 
 def train(rbm, dataset, max_iter=2000):
-    with tf.device('/cpu:0'):
-        generated_img, loss = rbm.build_graph('free-energy-loss')
+    generated_img, loss = rbm.build_graph('free-energy-loss')
     train_step = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
 
     # Test trained model
@@ -102,16 +110,16 @@ def load_demo_rbm(modelname):
         dtype = 'float32'
         num_batch, num_visible, num_hidden = 100, 784, 500
     elif modelname=='spin-chain':
-        dtype = 'complex128'
-        num_batch, num_visible, num_hidden = 1, 16, 4
+        dtype = 'float64'
+        num_batch, num_visible, num_hidden = 1, 8, 4
     else:
         raise ValueError('undefined model name %s'%modelname)
     rbm = RBM(tf.placeholder(dtype, (num_batch, num_visible), name='visible_input'), num_hidden)
     return rbm
 
 if __name__ == '__main__':
-    #save_tensorboard_graph('v-prob')
+    save_tensorboard_graph('v-prob')
     #save_tensorboard_graph('square-loss')
     #save_tensorboard_graph('free-energy-loss')
     #save_tensorboard_graph('free-energy')
-    test_train()
+    #test_train()
