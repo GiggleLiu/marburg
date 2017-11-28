@@ -3,12 +3,33 @@ import matplotlib.pyplot as plt
 
 import struct
 
-def sigmoid(x):
-    return 1.0/(1.0+np.exp(-x))
+class Sigmoid(object):
+    @staticmethod
+    def forward(x):
+        return 1.0/(1.0+np.exp(-x))
+    @staticmethod
+    def backward(x,delta):
+        return delta.dot((1-self.forward(x))*self.forward(x))
+    @staticmethod
+    def update():
+        pass
 
+class MSE(object):
+    @staticmethod
+    def forward(x,l):
+        return 0.5*((x-l)**2).sum()
+    @staticmethod
+    def backward(x,l,delta):
+        return delta*(x-l)
+    @staticmethod
+    def update():
+        pass
+
+'''
 def softmax(x):
     exp = np.exp(x)
     return exp/exp.sum()
+'''
 
 def unpack(filename):
     with open(filename,'rb') as f:
@@ -22,7 +43,6 @@ def load_MNIST():
     data = []
     for name in files:
         data.append(unpack(name))
-    print(data[1].shape[0])
     labels = np.zeros([data[1].shape[0],10])
     for i,iterm in enumerate(data[1]):
         labels[i][iterm] = 1
@@ -40,7 +60,26 @@ class MLP_layer(object):
         self.activation = activation
     def forward(self,x):
         return self.activation(np.matmul(x,self.weight)+self.bias)
-    def backward(self,x):
+    def backward(self,x,delta):
+        self.weight_delta = x.dot(delta)
+        self.bias_delta = np.ones_like(self.bias)*delta
+        return self.delta
+    def update():
+        self.weight += self.weight_delta
+        self.bias += self.bias_delta
+
+class Network(object):
+    def __init__(self,layers_list):
+        self.layers_list = self.layers_list
+    def forward(self,x):
+        for layer in self.layers_list:
+            x = layer.forward(x)
+        return x
+    def backward(self,x,learning_rate):
+        delta = learning_rate
+        for layer in reversed(self.layers_list):
+            delta = layer.backward(delta)
+    def SGD():
         pass
 
 def main():
