@@ -33,12 +33,12 @@ def sigmoid_backward(delta,x):
     return delta*((1-sigmoid(x))*sigmoid(x))
 
 def MSE(x,l):
-    return 0.5*((x-l)**2).sum()
+    return 0.5*((x-l)**2).mean()
 def MSE_backward(delta,x):
     return delta*(x)
 
 def main():
-    Batch_Size = 5
+    Batch_Size = 10
     Steps = 100
     IMG_Size = 28*28
     Hidden_Size_1 = 110
@@ -52,9 +52,11 @@ def main():
 
     weight_1 = np.random.randn(IMG_Size,Hidden_Size_1)
     bias_1 = np.random.randn(Hidden_Size_1)
-    
+
     weight_2 = np.random.randn(Hidden_Size_1,Hidden_Size_2)
     bias_2 = np.random.randn(Hidden_Size_2)
+
+    loss_pack = []
     for _ in range(Nepochs):
         for i in range(100):
             #import pdb
@@ -78,6 +80,7 @@ def main():
             print(labels)
             #print((layer_2-labels)**2)
             print(loss)
+            loss_pack.append(loss)
 
             delta = Learning_Rate
             delta = MSE_backward(delta,layer_2-labels)
@@ -92,5 +95,23 @@ def main():
 
             weight_1 -= delta_weight_1
             weight_2 -= delta_weight_2
+
+    test = data[2].reshape([-1,IMG_Size])
+    labels = data[3]
+
+    print(test.shape)
+    print(labels.shape)
+
+    layer_1_ = test.dot(weight_1)+bias_1
+    layer_1 = sigmoid(layer_1_)
+    layer_2_ = layer_1.dot(weight_2)+bias_2
+    layer_2 = sigmoid(layer_2_)
+
+    loss = MSE(layer_2,labels)
+
+    print(loss)
+    plt.plot(loss_pack)
+    plt.show()
+
 if __name__ == "__main__":
     main()
