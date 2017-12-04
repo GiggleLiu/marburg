@@ -26,25 +26,26 @@ def load_MNIST():
     return data
 
 class Sigmoid(object):
-    @staticmethod
-    def forward(x):
+    def __init__(self):
+        pass
+    def forward(self,x):
+        self.x = x
         return 1.0/(1.0+np.exp(-x))
-    @staticmethod
-    def backward(x,delta):
-        return delta.dot((1-self.forward(x))*self.forward(x))
-    @staticmethod
-    def update():
+    def backward(self,delta):
+        return delta.dot((1-self.forward(self.x))*self.forward(self.x))
+    def update(self):
         pass
 
 class MSE(object):
-    @staticmethod
-    def forward(x,l):
+    def __init__(self):
+        pass
+    def forward(self,x,l):
+        self.x = x
+        self.l = l
         return 0.5*((x-l)**2).sum()
-    @staticmethod
-    def backward(x,l,delta):
-        return delta*(x-l)
-    @staticmethod
-    def update():
+    def backward(self,delta):
+        return delta*(self.x-self.l)
+    def update(self):
         pass
 
 class MLP_layer(object):
@@ -53,32 +54,31 @@ class MLP_layer(object):
         self.bias = np.random.randn(output_shape)
         self.activation = activation
     def forward(self,x):
-        self.before_activation = np.matmul(x,self.weight)+self.bias)
-        return self.activation(self.before_activation)
-    def backward(self,x,delta):
-        delta = self.activation.backward(self.before_activation,delta)
-        self.weight_delta = x.T.dot(delta)
+        self.x = x
+        return self.activation(np.matmul(x,self.weight)+self.bias)
+    def backward(self,delta):
+        delta = self.activation.backward(delta)
+        self.weight_delta = self.x.T.dot(delta)
         self.bias_delta = np.sum(delta,0)
         return self.delta
-    def update():
+    def update(self):
         self.weight -= self.weight_delta
         self.bias -= self.bias_delta
 
 class Network(object):
     def __init__(self,layers_list):
         self.layers_list = self.layers_list
-        self.memory=[]
     def forward(self,x):
         for layer in self.layers_list:
-            self.memory.append(x)
             x = layer.forward(x)
         return x
     def backward(self,x,learning_rate):
         delta = learning_rate
         for layer in reversed(self.layers_list):
             delta = layer.backward(delta)
-    def SGD():
-        pass
+    def update(self):
+        for layer in self.layers_list:
+            layer.update()
 
 def main():
     data = load_MNIST()
