@@ -3,34 +3,6 @@ import matplotlib.pyplot as plt
 
 import struct
 
-class Sigmoid(object):
-    @staticmethod
-    def forward(x):
-        return 1.0/(1.0+np.exp(-x))
-    @staticmethod
-    def backward(x,delta):
-        return delta.dot((1-self.forward(x))*self.forward(x))
-    @staticmethod
-    def update():
-        pass
-
-class MSE(object):
-    @staticmethod
-    def forward(x,l):
-        return 0.5*((x-l)**2).sum()
-    @staticmethod
-    def backward(x,l,delta):
-        return delta*(x-l)
-    @staticmethod
-    def update():
-        pass
-
-'''
-def softmax(x):
-    exp = np.exp(x)
-    return exp/exp.sum()
-'''
-
 def unpack(filename):
     with open(filename,'rb') as f:
         _,_, dims = struct.unpack('>HBB',f.read(4))
@@ -53,26 +25,52 @@ def load_MNIST():
     data[3] = labels
     return data
 
+class Sigmoid(object):
+    @staticmethod
+    def forward(x):
+        return 1.0/(1.0+np.exp(-x))
+    @staticmethod
+    def backward(x,delta):
+        return delta.dot((1-self.forward(x))*self.forward(x))
+    @staticmethod
+    def update():
+        pass
+
+class MSE(object):
+    @staticmethod
+    def forward(x,l):
+        return 0.5*((x-l)**2).sum()
+    @staticmethod
+    def backward(x,l,delta):
+        return delta*(x-l)
+    @staticmethod
+    def update():
+        pass
+
 class MLP_layer(object):
     def __init__(self,input_shape,output_shape,activation):
         self.weight = np.random.randn(input_shape,output_shape)
         self.bias = np.random.randn(output_shape)
         self.activation = activation
     def forward(self,x):
-        return self.activation(np.matmul(x,self.weight)+self.bias)
+        self.before_activation = np.matmul(x,self.weight)+self.bias)
+        return self.activation(self.before_activation)
     def backward(self,x,delta):
-        self.weight_delta = x.dot(delta)
-        self.bias_delta = np.ones_like(self.bias)*delta
+        delta = self.activation.backward(self.before_activation,delta)
+        self.weight_delta = x.T.dot(delta)
+        self.bias_delta = np.sum(delta,0)
         return self.delta
     def update():
-        self.weight += self.weight_delta
-        self.bias += self.bias_delta
+        self.weight -= self.weight_delta
+        self.bias -= self.bias_delta
 
 class Network(object):
     def __init__(self,layers_list):
         self.layers_list = self.layers_list
+        self.memory=[]
     def forward(self,x):
         for layer in self.layers_list:
+            self.memory.append(x)
             x = layer.forward(x)
         return x
     def backward(self,x,learning_rate):
