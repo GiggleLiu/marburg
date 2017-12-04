@@ -59,7 +59,7 @@ def main():
     loss_pack = []
     ratio_pack = []
     for _ in range(Nepochs):
-        for i in range(100):
+        for i in range(Steps):
             #import pdb
             #pdb.set_trace()
             train = data[0].reshape([-1,IMG_Size])[Batch_Size*(i):Batch_Size*(i+1),:]
