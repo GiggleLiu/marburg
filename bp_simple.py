@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import struct
 
-np.random.seed(42)
+#np.random.seed(42)
 
 def unpack(filename):
     with open(filename,'rb') as f:
@@ -57,6 +57,7 @@ def main():
     bias_2 = np.random.randn(Hidden_Size_2)
 
     loss_pack = []
+    ratio_pack = []
     for _ in range(Nepochs):
         for i in range(100):
             #import pdb
@@ -75,12 +76,18 @@ def main():
             layer_2_ = layer_1.dot(weight_2)+bias_2
             layer_2 = sigmoid(layer_2_)
 
+            assume = np.argmax(layer_2,axis=1)
+            labels_ = np.argmax(labels,axis=1)
+            ratio = np.count_nonzero(assume == labels_)/Batch_Size
+
             loss = MSE(layer_2,labels)
-            print(layer_2)
-            print(labels)
+            #print(layer_2)
+            #print(labels)
             #print((layer_2-labels)**2)
             print(loss)
+            print(ratio)
             loss_pack.append(loss)
+            ratio_pack.append(ratio)
 
             delta = Learning_Rate
             delta = MSE_backward(delta,layer_2-labels)
@@ -101,6 +108,7 @@ def main():
 
     print(test.shape)
     print(labels.shape)
+    Test_size = test.shape[0]
 
     layer_1_ = test.dot(weight_1)+bias_1
     layer_1 = sigmoid(layer_1_)
@@ -109,7 +117,12 @@ def main():
 
     loss = MSE(layer_2,labels)
 
+    assume = np.argmax(layer_2,axis=1)
+    labels_ = np.argmax(labels,axis=1)
+    ratio = np.count_nonzero(assume == labels_)/Test_size
+
     print(loss)
+    print(ratio)
     plt.plot(loss_pack)
     plt.show()
 
