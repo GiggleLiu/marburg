@@ -152,8 +152,8 @@ def load_demo_rbm(modelname):
 
 
 if __name__ == '__main__':
-    # save_tensorboard_graph('psi')
+    save_tensorboard_graph('psi')
     # save_tensorboard_graph('square-loss')
     # save_tensorboard_graph('free-energy-loss', 2)
     # save_tensorboard_graph('free-energy')
-    test_train()
+    # test_train()

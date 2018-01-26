@@ -1,8 +1,13 @@
 import numpy as np
 import pdb
 import tensorflow as tf
+import torch
+from torch.autograd import Variable
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
-__all__ = ['sample_prob', 'typed_normal', 'save_img44', 'convolution_pbc']
+__all__ = ['sample_prob', 'typed_normal', 'save_img44', 'convolution_pbc',
+        'sample_from_prob', 'show_images']
 
 
 def sample_prob(probs, name):
@@ -78,3 +83,14 @@ def convolution_pbc(input, filter, *args, data_format=None, **kwargs):
     res = tf.nn.convolution(expanded_input, filter, padding='VALID',
                             data_format=data_format, *args, **kwargs)
     return res
+
+def show_images(f_list):
+    '''
+    display images in f_list.
+    '''
+    gs = plt.GridSpec(len(f_list),1)
+    for i, f in enumerate(f_list):
+        plt.subplot(gs[i,0])
+        plt.imshow(plt.imread(f))
+        plt.axis('off')
+    plt.show()

@@ -144,6 +144,13 @@ def test_vmc_rbm():
           (E_mean_.real, model.E_exact.real))
     assert_almost_equal(E_mean, model.E_exact, decimal=1)
 
+def test_binary():
+    rbm = BinaryRBM(4, 4)
+    pv = rbm.pv(Variable(torch.Tensor([-1, 1, 1, -1])))
+    ph = rbm.ph(Variable(torch.Tensor([-1, 1, 1, -1])))
+    print(pv, ph)
+    pdb.set_trace()
+
 
 if __name__ == '__main__':
     np.random.seed(2)
