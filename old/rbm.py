@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 def show_adn_save(file_name, img):
     npimg = np.transpose(img.numpy(), (1, 2, 0))
-    f = "./%s.png" % file_name
+    f = "data/images/%s.png" % file_name
     plt.imshow(npimg)
     plt.imsave(f, npimg)
 
@@ -71,6 +71,7 @@ class RBM(nn.Module):
         hidden_term = wx_b.exp().add(1).log().sum(1)
         return (-hidden_term - vbias_term).mean()
 
+
 class BinaryRBM(RBM):
     '''
     the binary (-1, 1) version Restricted Boltzmann Machine.
@@ -92,6 +93,7 @@ class BinaryRBM(RBM):
 
     def ph(self, h):
         return (2 * (self.W.t().mv(h) + self.v_bias).cosh()).prod() * (self.h_bias.dot(h)).exp()
+
 
 def train():
     batch_size = 64
@@ -141,4 +143,4 @@ def test_binary():
 
 if __name__ == '__main__':
     train()
-    #test_binary()
+    # test_binary()
