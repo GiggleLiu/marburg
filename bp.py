@@ -60,7 +60,7 @@ class MLP_layer(object):
         delta = self.activation.backward(delta)
         self.weight_delta = self.x.T.dot(delta)
         self.bias_delta = np.sum(delta,0)
-        return self.delta
+        return self.delta  # incorrect?
     def update(self):
         self.weight -= self.weight_delta
         self.bias -= self.bias_delta

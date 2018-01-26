@@ -66,6 +66,9 @@ class RBM(nn.Module):
 
     def free_energy(self, v):
         '''
+        free energy E(x) = log(\sum_h exp(x, h)) = log(p(x)*Z).
+        It can be used to obtain log-likelihood L = <E(x)>_{data} - <E(x)>_{model}.
+
         Args:
             v (ndarray): visible input.
 
@@ -74,7 +77,7 @@ class RBM(nn.Module):
         '''
         vbias_term = v.mv(self.v_bias)
         wx_b = F.linear(v, self.W, self.h_bias)
-        hidden_term = wx_b.exp().add(1).log().sum(1)
+        hidden_term = wx_b.exp().add(1).log().sum(dim=1)
         return (-hidden_term - vbias_term).mean()
 
 
@@ -162,7 +165,7 @@ def sample_from_prob(prob_list):
     return F.relu(torch.sign(prob_list - rand))
 
 if __name__ == '__main__':
-    show_images(['data/images/%s.png'%x for x in ['real', 'generate']])
+    #show_images(['data/images/%s.png'%x for x in ['real', 'generate']])
     t0=time.time()
     train(use_cuda=True)
     t1=time.time()
