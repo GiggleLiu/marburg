@@ -32,7 +32,7 @@ class RBM(nn.Module):
 
     def _v_to_h(self, v):
         '''
-        forward pass from visible to hidden, v is visible input.
+        forward pass p(h|v) from visible to hidden, v is visible input.
         '''
         p_h = F.sigmoid(F.linear(v, self.W, self.h_bias))
         sample_h = sample_from_prob(p_h)
@@ -40,7 +40,7 @@ class RBM(nn.Module):
 
     def _h_to_v(self, h):
         '''
-        backward pass from hidden to visible, h is hidden input.
+        backward pass p(v|h) from hidden to visible, h is hidden input.
         '''
         p_v = F.sigmoid(F.linear(h, self.W.t(), self.v_bias))
         sample_v = sample_from_prob(p_v)

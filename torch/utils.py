@@ -1,9 +1,6 @@
 import numpy as np
 import pdb
 import tensorflow as tf
-import torch
-from torch.autograd import Variable
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
 __all__ = ['sample_prob', 'typed_normal', 'save_img44', 'convolution_pbc',
@@ -40,31 +37,6 @@ def save_img44(filename, data):
             ax.axis('off')
     gs.tight_layout(fig, pad=0)
     plt.show()
-
-
-def binning_statistics(var_list, num_bin):
-    '''
-    binning statistics for variable list.
-    '''
-    num_sample = len(var_list)
-    var_list = var_list.real
-    if num_sample % num_bin != 0:
-        raise
-    size_bin = num_sample // num_bin
-
-    # mean, variance
-    mean = np.mean(var_list, axis=0)
-    variance = np.var(var_list, axis=0)
-
-    # binned variance and autocorrelation time.
-    variance_binned = np.var(
-        [np.mean(var_list[size_bin * i:size_bin * (i + 1)]) for i in range(num_bin)])
-    t_auto = 0.5 * size_bin * \
-        np.abs(np.mean(variance_binned) / np.mean(variance))
-    stderr = np.sqrt(variance_binned / num_bin)
-    print('Binning Statistics: Energy = %.4f +- %.4f, Auto correlation Time = %.4f' %
-          (mean, stderr, t_auto))
-    return mean, stderr
 
 
 def get_variable_by_name(name):
@@ -110,7 +82,7 @@ def numdiff(layer, x, var, dy, delta):
         var_delta_list.append(var_delta)
 
         # restore changes
-        var_raveled[ix] += delta
+        var_raveled[ix] += delta/2.
     return np.array(var_delta_list)
 
 def sanity_check(layer, x, args, delta=0.01, precision=1e-3):
@@ -126,9 +98,9 @@ def sanity_check(layer, x, args, delta=0.01, precision=1e-3):
         precision: the required precision of gradient (usually introduced by numdiff).
     '''
     y = layer.forward(x, *args)
-    dy = torch.randn(y.shape)
+    dy = np.random.randn(y.shape)
     x_delta = layer.backward(dy)
 
-    for var, var_delta in zip([x] + layer.vars, [dx] + layer.var_deltas):
+    for var, var_delta in zip([x] + layer.parameters, [dx] + layer.parameters_deltas):
         x_delta_num = numdiff(layer, x, var, dy, delta)
-        assert(np.all(abs(x_delta_num - x_delta) < precision))
+        assert(np.all(abs(x_delta_num - var_delta) < precision))
