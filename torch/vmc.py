@@ -12,7 +12,11 @@ def vmc_measure(model, initial_config, num_bath=200, num_sample=1000, num_bin=50
     Measure an operator.
 
     Args:
-        model (Model): model definition.
+        model (Model): model definition, requiring the following methods:
+            * propose_config, propose configuration based on old one.
+            * local_measure, get local energy and local gradient.
+            * 
+
         num_sample (int): number of samples.
 
     Return:
@@ -24,19 +28,18 @@ def vmc_measure(model, initial_config, num_bath=200, num_sample=1000, num_bin=50
 
     energy_loc_list, grad_loc_list = [], []
     config = initial_config
-    wf = model.psi(config)
+    prob = model.prob(config)
 
     n_accepted = 0
     for i in range(num_bath + num_sample * measure_step):
         # generate new config and calculate probability ratio
         config_proposed = model.propose_config(config)
-        wf_proposed = model.psi(config_proposed)
-        prob_ratio = np.abs(wf_proposed / wf).item()**2
+        prob_proposed = model.prob(config_proposed)
 
-        # accept/reject move by one-line metropolis algorithm
-        if np.random.random() < prob_ratio:
+        # accept/reject a move by metropolis algorithm (world's most famous single line algorithm)
+        if np.random.random() < prob_proposed / prob:
             config = config_proposed
-            wf = wf_proposed
+            prob = prob_proposed
             n_accepted += 1
 
         # measurements
@@ -46,7 +49,7 @@ def vmc_measure(model, initial_config, num_bath=200, num_sample=1000, num_bin=50
             energy_loc_list.append(energy_loc)
             grad_loc_list.append(grad_loc)
 
-        # print status
+        # print statistics
         if i % print_step == print_step - 1:
             print('%-10s Accept rate: %.3f' %
                   (i + 1, n_accepted * 1. / print_step))

@@ -1,9 +1,17 @@
 import numpy as np
-import pdb
 
 def heisenberg_loc(config, psi_func, psi_loc, J=1.):
     '''
-    1D Periodic Heisenberg chain local energy.
+    local energy for 1D Periodic Heisenberg chain.
+
+    Args:
+        config (1darray): bit string as spin configuration.
+        psi_func (func): wave function.
+        psi_loc (number): wave function projected on configuration <config|psi>.
+        J (float): coupling strengh.
+
+    Returns:
+        number: local energy.
     '''
     # get weights and flips after applying hamiltonian \sum_i w_i|sigma_i> = H|sigma>
     nsite = len(config)

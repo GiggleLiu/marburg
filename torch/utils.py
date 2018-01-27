@@ -38,36 +38,6 @@ def save_img44(filename, data):
     gs.tight_layout(fig, pad=0)
     plt.show()
 
-
-def get_variable_by_name(name):
-    weight_var = tf.get_collection(tf.GraphKeys.VARIABLES, name)[0]
-
-
-def convolution_pbc(input, filter, *args, data_format=None, **kwargs):
-    '''convolution with periodic padding.'''
-    irank = len(input.shape) - 2
-    if data_format is None or data_format[:2] != 'NC':
-        expanded_input = tf.tile(
-            input, [1] + [2] * irank + [1])[(slice(None),) + (slice(None, -1),) * irank]
-    else:
-        expanded_input = tf.tile(
-            input, [1, 1] + [2] * irank)[(slice(None),) * 2 + (slice(None, -1),) * irank]
-    res = tf.nn.convolution(expanded_input, filter, padding='VALID',
-                            data_format=data_format, *args, **kwargs)
-    return res
-
-def show_images(f_list):
-    '''
-    display images in f_list.
-    '''
-    gs = plt.GridSpec(len(f_list),1)
-    for i, f in enumerate(f_list):
-        plt.subplot(gs[i,0])
-        plt.imshow(plt.imread(f))
-        plt.axis('off')
-    plt.show()
-
-
 def numdiff(layer, x, var, dy, delta):
     '''numerical differenciation.'''
     var_raveled = var.ravel()
