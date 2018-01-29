@@ -6,7 +6,7 @@ from numpy.testing import dec, assert_, assert_raises,\
     assert_almost_equal, assert_allclose
 
 from vmc import vmc_measure
-from hamiltonians import heisenberg_loc
+from hamiltonians import heisenberg_loc, packbits, unpackbits
 from train import VMCKernel
 from rbm_torch import RBM
 from train import train
@@ -18,10 +18,10 @@ class FakeModel(object):
         self.nsite = 8
         H, self.E_exact, self.wf = get_heisenberg_ground_state(
             self.J, self.nsite)
-        self._configs = np.unpackbits(
-            np.arange(2**self.nsite)[:, None].astype('uint8'), axis=1)
+        self._configs = unpackbits(
+            np.arange(2**self.nsite)[:, None], self.nsite)
         self._mask = self._configs.sum(
-            axis=1) == self.nsite // 2  # Sz = 0 block
+            axis=1) == 0  # Sz = 0 block
         if wave_func == 'random' or not isinstance(wave_func, str):
             if wave_func == 'random':
                 psi = np.random.random(2**self.nsite)
@@ -36,7 +36,7 @@ class FakeModel(object):
 
     def get_wf(self, config):
         # 0 = spin up, 1 = spin down
-        return self.wf[np.packbits(config).item()]
+        return self.wf[packbits(config).item()]
 
     def prob(self, config):
         return np.abs(self.get_wf(config))**2
@@ -46,7 +46,7 @@ class FakeModel(object):
         p = np.abs(self.wf)**2
         p = p / p.sum()
         indices = np.random.choice(np.arange(len(self.wf)), batch_size, p=p)
-        res = np.unpackbits(indices[:, None].astype('uint8'), axis=1)
+        res = unpackbits(indices[:, None], self.nsite)
         return res, None
 
     def local_measure(self, config):
@@ -65,17 +65,17 @@ class FakeModel(object):
         '''
         # take ~ 5% probability to flip all spin, can making VMC sample better in Heisenberg model
         if np.random.random() < prob_flip:
-            return 1-old_config
+            return -old_config
 
         num_spin = len(old_config)
-        upmask = old_config == 0
+        upmask = old_config == 1
         flips = np.random.randint(0, num_spin // 2, 2)
         iflip0 = np.where(upmask)[0][flips[0]]
         iflip1 = np.where(~upmask)[0][flips[1]]
 
         config = old_config.copy()
-        config[iflip0] = 1
-        config[iflip1] = 0
+        config[iflip0] = -1
+        config[iflip1] = 1
         return config
 
 def get_heisenberg_ground_state(J, nsite):
@@ -133,7 +133,7 @@ def test_vmc_random():
     print('Testing local energy, VMC and config proposal.')
     model = FakeModel(wave_func='random')
     E_mean, grad_mean, Egrad_mean, E_err = vmc_measure(
-        model, initial_config=np.array([0, 1] * (model.nsite // 2)), num_bath=2000, num_sample=10000)
+        model, initial_config=np.array([-1, 1] * (model.nsite // 2)), num_bath=2000, num_sample=10000)
     print('Get energy %.6f (exact = %.6f)' % (E_mean, model.E_exact))
     assert_almost_equal(E_mean, model.E_exact, decimal=1)
 
@@ -152,9 +152,9 @@ def test_vmc_rbm():
     model = FakeModel(wave_func=wf)
 
     E_mean, grad_mean, Egrad_mean, E_err = vmc_measure(
-        model, initial_config=np.array([0, 1] * (model.nsite // 2)), num_bath=200, num_sample=10000)
+        model, initial_config=np.array([-1, 1] * (model.nsite // 2)), num_bath=200, num_sample=10000)
     E_mean_, grad_mean_, Egrad_mean_, E_err_ = vmc_measure(
-        model_, initial_config=np.array([0, 1] * (model.nsite // 2)), num_bath=200, num_sample=10000)
+        model_, initial_config=np.array([-1, 1] * (model.nsite // 2)), num_bath=200, num_sample=10000)
     print('Get energy %.6f (exact = %.6f)' % (E_mean.real, model.E_exact.real))
     print('True model Get energy %.6f (exact = %.6f)' %
           (E_mean_.real, model.E_exact.real))
@@ -170,6 +170,6 @@ def test_binary():
 
 if __name__ == '__main__':
     np.random.seed(2)
-    # test_vmc_random()
-    test_vmc_rbm()
+    test_vmc_random()
+    # test_vmc_rbm()
     #test_train_rbm_using_exact_wf()

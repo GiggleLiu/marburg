@@ -13,9 +13,8 @@ def vmc_measure(model, initial_config, num_bath=200, num_sample=1000, num_bin=50
 
     Args:
         model (Model): model definition, requiring the following methods:
-            * propose_config, propose configuration based on old one.
             * local_measure, get local energy and local gradient.
-            * 
+            * prob, get the probability of specific distribution.
 
         num_sample (int): number of samples.
 
@@ -55,13 +54,13 @@ def vmc_measure(model, initial_config, num_bath=200, num_sample=1000, num_bin=50
                   (i + 1, n_accepted * 1. / print_step))
             n_accepted = 0
 
-    # process samples
+    # binning statistics
     energy_loc_list = np.array(energy_loc_list)
     energy, energy_precision = binning_statistics(energy_loc_list, num_bin=num_bin)
 
+    # get sample expectations
     grad_mean = []
     energy_grad = []
-    gradgrad_mean = []
     for grad_loc in zip(*grad_loc_list):
         grad_loc = np.array(grad_loc)
         grad_mean.append(grad_loc.mean(axis=0))
@@ -75,7 +74,6 @@ def binning_statistics(var_list, num_bin):
     binning statistics for variable list.
     '''
     num_sample = len(var_list)
-    var_list = var_list.real
     if num_sample % num_bin != 0:
         raise
     size_bin = num_sample // num_bin
@@ -93,4 +91,3 @@ def binning_statistics(var_list, num_bin):
     print('Binning Statistics: Energy = %.4f +- %.4f, Auto correlation Time = %.4f' %
           (mean, stderr, t_auto))
     return mean, stderr
-

@@ -24,9 +24,11 @@ class RBM(nn.Module):
 
     def __init__(self, num_visible, num_hidden):
         super(RBM, self).__init__()
-        self.W = nn.Parameter(torch.randn(num_hidden, num_visible) * 1e-1)
+        self.W = nn.Parameter(torch.randn(num_hidden, num_visible) * 1e-2)
         self.v_bias = nn.Parameter(torch.zeros(num_visible))
-        self.h_bias = nn.Parameter(torch.randn(num_hidden) * 1e-1)
+        self.h_bias = nn.Parameter(torch.randn(num_hidden) * 1e-2)
+        self.num_visible = num_visible
+        self.num_hidden = num_hidden
 
     def _v_to_h(self, v):
         '''
@@ -79,7 +81,7 @@ class RBM(nn.Module):
 
     def prob_visible(self, v):
         '''
-        probability for visible nodes.
+        probability for visible nodes, visible/hidden nodes here take [-1, 1].
 
         Args:
             v (1darray): visible input.
@@ -88,9 +90,8 @@ class RBM(nn.Module):
             float: the probability of v.
         '''
         v = Variable(v.float())
+        if self.W.is_cuda: v = v.cuda(async=True)
         return (2 * (self.W.mv(v) + self.h_bias).cosh()).prod() * (self.v_bias.dot(v)).exp()
-        #v = Variable(v.float()[None,:])
-        #return self.free_energy(v).exp()
 
 def mnist_train(use_cuda, network_file):
     '''
@@ -100,7 +101,7 @@ def mnist_train(use_cuda, network_file):
     num_hidden = 500
 
     rbm = RBM(num_visible, num_hidden)
-    if use_cuda: rbm = rbm.cuda()
+    if use_cuda: rbm = rbm.cuda(async=True)
     loader = mnist01_loader(True, use_cuda, batch_size=64)
 
     train_op = torch.optim.SGD(rbm.parameters(), 0.1)
@@ -174,7 +175,7 @@ def mnist01_loader(is_train, use_cuda, batch_size):
     '''
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST('data', train=is_train,
-                    download=not os.path.isdir('data'),
+                    download=True,
                        transform=transforms.Compose([
                            transforms.ToTensor()
                        ])), batch_size=batch_size, pin_memory=True)
@@ -186,8 +187,8 @@ def mnist01_loader(is_train, use_cuda, batch_size):
             data = data.bernoulli()
             if use_cuda:
                 # copy data to gpu memory
-                data = data.cuda()
-                label = label.cuda()
+                data = data.cuda(async=True)
+                label = label.cuda(async=True)
             yield data, label
     return iterator
 
