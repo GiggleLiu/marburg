@@ -103,54 +103,19 @@ def main():
             train = normalization(train)
 
             l = network.loss(train.reshape(train.shape[0],-1),label)
-            '''
-            tmp1 = l1.forward(train.reshape(train.shape[0],-1))
-            act1 = activation1.forward(tmp1)
-            tmp2 = l2.forward(act1)
-            act2 = activation2.forward(tmp2)
-            tmp3 = l3.forward(act2)
-            act3 = activation3.forward(tmp3)
-
-            l = mse.forward(act3,label)
-            '''
 
             print("epoch:",i,"iteration:",j,"/",iterations,"loss:",l)
 
             network.backward(args.lr)
             network.update()
-            '''
-            mseb = mse.backward(args.lr)
-
-            act3b = activation3.backward(mseb)
-            l3b = l3.backward(act3b)
-            act2b = activation2.backward(l3b)
-            l2b = l2.backward(act2b)
-            act1b = activation1.backward(l2b)
-            l1b = l1.backward(act1b)
-
-            l3.weight -= l3.weight_delta
-            l3.bias -= l3.bias_delta
-            l2.weight -= l2.weight_delta
-            l2.bias -= l2.bias_delta
-            l1.weight -= l1.weight_delta
-            l1.bias -= l1.bias_delta
-            '''
-
-    import pdb
-    pdb.set_trace()
 
     test,label = testbuff.draw(args.testbatch)
 
     test = normalization(test)
 
-    tmp1 = l1.forward(test.reshape(test.shape[0],-1))
-    act1 = activation1.forward(tmp1)
-    tmp2 = l2.forward(act1)
-    act2 = activation2.forward(tmp2)
-    tmp3 = l3.forward(act2)
-    act3 = activation3.forward(tmp3)
+    r = network.forward(test)
 
-    l = mse.forward(act3,label)
+    l = mse.forward(r,label)
 
     print(l)
 
