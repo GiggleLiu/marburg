@@ -23,37 +23,15 @@ class MSE(object):
 
 class Linear(object):
     def __init__(self,input_shape,output_shape):
-        self.weight = np.random.randn(input_shape,output_shape)
-        self.bias = np.random.randn(output_shape)
+        self.parameters = [np.random.randn(input_shape,output_shape),np.random.randn(output_shape)]
+        self.parameters_deltas = [None,None]
     def forward(self,x):
         self.x = x
-        return np.matmul(x,self.weight)+self.bias
+        return np.matmul(x,self.parameters[0])+self.parameters[1]
     def backward(self,delta):
-        self.weight_delta = self.x.T.dot(delta)
-        self.bias_delta = np.sum(delta,0)
-        return delta.dot(self.weight.T)
-
-class Network(object):
-    def __init__(self,layers_list,loss):
-        self.layers_list = layers_list
-        self.lossfn = loss
-    def forward(self,x):
-        for layer in self.layers_list:
-            x = layer.forward(x)
-        return x
-    def loss(self,x,label):
-        x = self.forward(x)
-        l = self.lossfn.forward(x,label)
-        return l
-    def backward(self,learning_rate):
-        delta = self.lossfn.backward(learning_rate)
-        for layer in reversed(self.layers_list):
-            delta = layer.backward(delta)
-    def update(self):
-        for layer in self.layers_list:
-            if type(layer) == Linear:
-                layer.weight -= layer.weight_delta
-                layer.bias -= layer.bias_delta
+        self.parameters_deltas[0] = self.x.T.dot(delta)
+        self.parameters_deltas[1] = np.sum(delta,0)
+        return delta.dot(self.parameters[0].T)
 
 def normalization(data):
     return (data+np.random.uniform(size=data.shape))/256.0
@@ -89,7 +67,7 @@ def main():
 
     mse = MSE()
 
-    network = Network([l1,activation1,l2,activation2,l3,activation3],mse)
+    layers = [l1,activation1,l2,activation2,l3,activation3]
 
     if args.iterations == -1:
         iterations = buff.data.shape[0]//args.batchsize
@@ -100,22 +78,36 @@ def main():
         for j in range(iterations):
             train,label = buff.draw(args.batchsize)
 
-            train = normalization(train)
+            result = normalization(train).reshape(args.batchsize,-1)
 
-            l = network.loss(train.reshape(train.shape[0],-1),label)
+            for layer in layers:
+                result = layer.forward(result)
+
+            l = mse.forward(result,label)
 
             print("epoch:",i,"iteration:",j,"/",iterations,"loss:",l)
 
-            network.backward(args.lr)
-            network.update()
+            delta = mse.backward(args.lr)
+
+            for layer in reversed(layers):
+                delta = layer.backward(delta)
+
+            for layer in layers:
+                if type(layer) == Linear:
+                    for no,parameter in enumerate(layer.parameters):
+                        parameter -= layer.parameters_deltas[no]
 
     test,label = testbuff.draw(args.testbatch)
 
-    test = normalization(test)
+    result = normalization(test).reshape(args.testbatch,-1)
 
-    r = network.forward(test)
+    import pdb
+    pdb.set_trace()
 
-    l = mse.forward(r,label)
+    for layer in layers:
+        result = layer.forward(result)
+
+    l = mse.forward(result,label)
 
     print(l)
 
