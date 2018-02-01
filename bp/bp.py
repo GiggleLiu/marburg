@@ -6,6 +6,8 @@ from utils import Buffer
 
 
 class Sigmoid(object):
+    def __init__(self):
+        self.parameters = []
     def forward(self,x):
         self.x = x
         self.r =  1.0/(1.0+np.exp(-x))
@@ -14,6 +16,8 @@ class Sigmoid(object):
         return delta*((1-self.r)*self.r)
 
 class MSE(object):
+    def __init__(self):
+        self.parameters = []
     def forward(self,x,l):
         self.x = x
         self.l = l
