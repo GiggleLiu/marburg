@@ -46,7 +46,7 @@ def numdiff(layer, x, var, dy, delta):
         var_raveled[ix] += delta/2.
     return np.array(var_delta_list)
 
-def sanity_check(layer, x, args, delta=0.01, precision=1e-3):
+def sanity_check(layer, x, *args, delta=0.01, precision=1e-3):
     '''
     perform sanity check for a layer,
     raise an assertion error if failed to pass all sanity checks.
@@ -59,12 +59,12 @@ def sanity_check(layer, x, args, delta=0.01, precision=1e-3):
         precision: the required precision of gradient (usually introduced by numdiff).
     '''
     y = layer.forward(x, *args)
-    dy = np.random.randn(y.shape)
+    dy = np.random.randn(*y.shape)
     x_delta = layer.backward(dy)
 
-    for var, var_delta in zip([x] + layer.parameters, [dx] + layer.parameters_deltas):
+    for var, var_delta in zip([x] + layer.parameters, [x_delta] + layer.parameters_deltas):
         x_delta_num = numdiff(layer, x, var, dy, delta)
-        assert(np.all(abs(x_delta_num - var_delta) < precision))
+        assert(np.all(abs(x_delta_num.reshape(*var_delta.shape) - var_delta) < precision))
 
 def download_MNIST():
     base = "http://yann.lecun.com/exdb/mnist/"
