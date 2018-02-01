@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import struct
+import subprocess
+import os
 
 def unpack(filename):
     with open(filename,'rb') as f:
@@ -11,9 +13,11 @@ def unpack(filename):
         return data
 
 def load_MNIST():
-    files = ['MNIST/t10k-images-idx3-ubyte','MNIST/t10k-labels-idx1-ubyte','MNIST/train-images-idx3-ubyte','MNIST/train-labels-idx1-ubyte']
+    path = "../data/raw/"
+    files = ['t10k-images-idx3-ubyte','t10k-labels-idx1-ubyte','train-images-idx3-ubyte','train-labels-idx1-ubyte']
     data = []
     for name in files:
+        name = path+name
         data.append(unpack(name))
     labels = np.zeros([data[1].shape[0],10])
     for i,iterm in enumerate(data[1]):
@@ -24,6 +28,57 @@ def load_MNIST():
         labels[i][iterm] = 1
     data[3] = labels
     return data
+
+def numdiff(layer, x, var, dy, delta, args):
+    '''numerical differenciation.'''
+    var_raveled = var.ravel()
+
+    var_delta_list = []
+    for ix in range(len(var_raveled)):
+        var_raveled[ix] += delta/2.
+        yplus = layer.forward(x,*args)
+        var_raveled[ix] -= delta
+        yminus = layer.forward(x,*args)
+        var_delta = ((yplus - yminus)/delta*dy).sum()
+        var_delta_list.append(var_delta)
+
+        # restore changes
+        var_raveled[ix] += delta/2.
+    return np.array(var_delta_list)
+
+def sanity_check(layer, x, *args, delta=0.01, precision=1e-3):
+    '''
+    perform sanity check for a layer,
+    raise an assertion error if failed to pass all sanity checks.
+
+    Args:
+        layer (obj): user defined neural network layer.
+        x (ndarray): input array.
+        args: additional arguments for forward function.
+        delta: the strength of perturbation used in numdiff.
+        precision: the required precision of gradient (usually introduced by numdiff).
+    '''
+    y = layer.forward(x, *args)
+    dy = np.random.randn(*y.shape)
+    x_delta = layer.backward(dy)
+
+    for var, var_delta in zip([x] + layer.parameters, [x_delta] + layer.parameters_deltas):
+        x_delta_num = numdiff(layer, x, var, dy, delta, args)
+        assert(np.all(abs(x_delta_num.reshape(*var_delta.shape) - var_delta) < precision))
+
+def download_MNIST():
+    base = "http://yann.lecun.com/exdb/mnist/"
+    objects = ['t10k-images-idx3-ubyte','t10k-labels-idx1-ubyte','train-images-idx3-ubyte','train-labels-idx1-ubyte']
+    end = ".gz"
+    path = "../data/raw/"
+    cmd = ["mkdir","-p",path]
+    subprocess.check_call(cmd)
+    for obj in objects:
+        if not os.path.isfile(path+obj):
+            cmd = ["wget",base+obj+end,"-P",path]
+            subprocess.check_call(cmd)
+            cmd = ["gzip","-d",path+obj+end]
+            subprocess.check_call(cmd)
 
 class Buffer(object):
     def __init__(self,data,label):

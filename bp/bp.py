@@ -1,11 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import load_MNIST
+from utils import load_MNIST, download_MNIST
 from utils import Buffer
 
 
 class Sigmoid(object):
+    def __init__(self):
+        self.parameters = []
+        self.parameters_deltas = []
     def forward(self,x):
         self.x = x
         self.r =  1.0/(1.0+np.exp(-x))
@@ -14,6 +17,9 @@ class Sigmoid(object):
         return delta*((1-self.r)*self.r)
 
 class MSE(object):
+    def __init__(self):
+        self.parameters = []
+        self.parameters_deltas = []
     def forward(self,x,l):
         self.x = x
         self.l = l
@@ -38,6 +44,7 @@ def normalization(data):
 
 def main():
     import argparse
+    download_MNIST()
     parser = argparse.ArgumentParser(description='')
     group = parser.add_argument_group('learning  parameters')
     group.add_argument("-epochs",type=int,default=10,help="epochs to run")
