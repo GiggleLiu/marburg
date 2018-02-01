@@ -10,6 +10,11 @@ def test_Linear():
     x = np.random.uniform(size=(2,2))
     sanity_check(layer,x)
 
+def test_Sigmoid():
+    layer = Sigmoid()
+    x = np.random.uniform(size=(2,2))
+    sanity_check(layer,x)
+
 def main():
     test_Linear()
 
