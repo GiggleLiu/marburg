@@ -27,6 +27,19 @@ class MSE(object):
     def backward(self,delta):
         return delta*(self.x-self.l)
 
+class CrossEntropy(object):
+    def __init__(self):
+        self.parameters = []
+        self.parameters_deltas = []
+    def forward(self,x,l):
+        self.l = l
+        self.x = x
+        logx = np.log(x)
+        y = -l*logx
+        return y.sum()
+    def backward(self,delta):
+        return 1/self.x*self.l
+
 class Linear(object):
     def __init__(self,input_shape,output_shape):
         self.parameters = [np.random.randn(input_shape,output_shape),np.random.randn(output_shape)]
