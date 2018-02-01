@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import load_MNIST
+from utils import load_MNIST, download_MNIST
 from utils import Buffer
 
 
@@ -38,6 +38,7 @@ def normalization(data):
 
 def main():
     import argparse
+    download_MNIST()
     parser = argparse.ArgumentParser(description='')
     group = parser.add_argument_group('learning  parameters')
     group.add_argument("-epochs",type=int,default=10,help="epochs to run")
