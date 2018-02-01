@@ -18,10 +18,12 @@ def test_Sigmoid():
 def test_MSE():
     layer = MSE()
     x = np.random.uniform(size=(2,2))
-    sanity_check(layer,x)
+    sanity_check(layer,x,0)
 
 def main():
     test_Linear()
+    test_MSE()
+    test_Sigmoid()
 
 if __name__ == "__main__":
     main()
