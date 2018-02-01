@@ -64,17 +64,17 @@ def main():
     buff = Buffer(data[2],data[3])
     testbuff = Buffer(data[0],data[1])
 
-    l1 = Linear(784,500)
-    l2 = Linear(500,100)
-    l3 = Linear(100,10)
+    l1 = Linear(784,10)
+    #l2 = Linear(500,100)
+    #l3 = Linear(100,10)
 
     activation1 = Sigmoid()
-    activation2 = Sigmoid()
-    activation3 = Sigmoid()
+    #activation2 = Sigmoid()
+    #activation3 = Sigmoid()
 
     mse = MSE()
 
-    layers = [l1,activation1,l2,activation2,l3,activation3]
+    layers = [l1,activation1]
 
     if args.iterations == -1:
         iterations = buff.data.shape[0]//args.batchsize
@@ -85,14 +85,19 @@ def main():
         for j in range(iterations):
             train,label = buff.draw(args.batchsize)
 
-            result = normalization(train).reshape(args.batchsize,-1)
+            result = (train/255.0).reshape(args.batchsize,-1)
 
             for layer in layers:
                 result = layer.forward(result)
 
             l = mse.forward(result,label)
+            l = l/args.batchsize
 
-            print("epoch:",i,"iteration:",j,"/",iterations,"loss:",l)
+            label_p = np.argmax(result,axis=1)
+            label_t = np.argmax(label,axis=1)
+            ratio = np.sum(label_p == label_t)/label_t.shape[0]
+
+            print("epoch:",i,"iteration:",j,"/",iterations,"loss:",l,"ratio:",ratio)
 
             delta = mse.backward(args.lr)
 
@@ -106,17 +111,23 @@ def main():
 
     test,label = testbuff.draw(args.testbatch)
 
-    result = normalization(test).reshape(args.testbatch,-1)
-
-    import pdb
-    pdb.set_trace()
+    result = (test/255.0).reshape(args.testbatch,-1)
 
     for layer in layers:
         result = layer.forward(result)
 
-    l = mse.forward(result,label)
+    label_p = np.argmax(result,axis=1)
+    label_t = np.argmax(label,axis=1)
+    ratio = np.sum(label_p == label_t)/label_t.shape[0]
+
+    l = mse.forward(result,label)/args.testbatch
 
     print(l)
+    print(ratio)
+
+    import pdb
+    pdb.set_trace()
+
 
 if __name__ == "__main__":
     main()
