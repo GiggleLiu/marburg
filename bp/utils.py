@@ -29,16 +29,16 @@ def load_MNIST():
     data[3] = labels
     return data
 
-def numdiff(layer, x, var, dy, delta):
+def numdiff(layer, x, var, dy, delta, args):
     '''numerical differenciation.'''
     var_raveled = var.ravel()
 
     var_delta_list = []
     for ix in range(len(var_raveled)):
         var_raveled[ix] += delta/2.
-        yplus = layer.forward(x)
+        yplus = layer.forward(x,*args)
         var_raveled[ix] -= delta
-        yminus = layer.forward(x)
+        yminus = layer.forward(x,*args)
         var_delta = ((yplus - yminus)/delta*dy).sum()
         var_delta_list.append(var_delta)
 
@@ -63,7 +63,7 @@ def sanity_check(layer, x, *args, delta=0.01, precision=1e-3):
     x_delta = layer.backward(dy)
 
     for var, var_delta in zip([x] + layer.parameters, [x_delta] + layer.parameters_deltas):
-        x_delta_num = numdiff(layer, x, var, dy, delta)
+        x_delta_num = numdiff(layer, x, var, dy, delta, args)
         assert(np.all(abs(x_delta_num.reshape(*var_delta.shape) - var_delta) < precision))
 
 def download_MNIST():
