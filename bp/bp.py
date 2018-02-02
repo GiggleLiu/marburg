@@ -16,6 +16,19 @@ class Sigmoid(object):
     def backward(self,delta):
         return delta*((1-self.r)*self.r)
 
+class Softmax(object):
+    def __init__(self):
+        self.parameters = []
+        self.parameters_deltas = []
+    def forward(self,x):
+        self.x = x
+        exps = np.exp(x)
+        self.out = exps / exps.sum()
+        return self.out
+    def backward(self,delta):
+        return delta*self.out - self.out*(delta*self.out).sum()
+
+
 class MSE(object):
     def __init__(self):
         self.parameters = []
@@ -38,7 +51,7 @@ class CrossEntropy(object):
         y = -l*logx
         return y.sum()
     def backward(self,delta):
-        return 1/self.x*self.l
+        return delta*1/self.x*self.l
 
 class Linear(object):
     def __init__(self,input_shape,output_shape):
