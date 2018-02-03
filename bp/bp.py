@@ -22,11 +22,12 @@ class Softmax(object):
         self.parameters_deltas = []
     def forward(self,x):
         self.x = x
-        exps = np.exp(x)
-        self.out = exps / exps.sum()
+        xtmp = x - x.max(axis=1,keepdims=True)
+        exps = np.exp(xtmp)
+        self.out = exps / exps.sum(axis=1,keepdims=True)
         return self.out
     def backward(self,delta):
-        return delta*self.out - self.out*(delta*self.out).sum()
+        return delta*self.out - self.out*(delta*self.out).sum(axis=1,keepdims=True)
 
 
 class MSE(object):
@@ -45,42 +46,39 @@ class CrossEntropy(object):
         self.parameters = []
         self.parameters_deltas = []
     def forward(self,x,l):
+        x = np.maximum(x,1e-15)
         self.l = l
         self.x = x
         logx = np.log(x)
         y = -l*logx
         return y.sum()
     def backward(self,delta):
-        return delta*1/self.x*self.l
+        return -delta*1/self.x*self.l
 
 class Linear(object):
-    def __init__(self,input_shape,output_shape):
-        self.parameters = [np.random.randn(input_shape,output_shape),np.random.randn(output_shape)]
+    def __init__(self,input_shape,output_shape,mean = 0, variance = 0.1):
+        self.parameters = [mean+variance*np.random.randn(input_shape,output_shape),mean+variance*np.random.randn(output_shape)]
         self.parameters_deltas = [None,None]
     def forward(self,x):
         self.x = x
         return np.matmul(x,self.parameters[0])+self.parameters[1]
     def backward(self,delta):
-        self.parameters_deltas[0] = self.x.T.dot(delta)
-        self.parameters_deltas[1] = np.sum(delta,0)
+        self.parameters_deltas[0] = self.x.T.dot(delta)/self.x.shape[0]
+        self.parameters_deltas[1] = np.sum(delta,0)/self.x.shape[0]
         return delta.dot(self.parameters[0].T)
 
 def normalization(data):
     return (data+np.random.uniform(size=data.shape))/256.0
 
 def main():
+    np.random.seed(42)
     import argparse
     download_MNIST()
+
     parser = argparse.ArgumentParser(description='')
     group = parser.add_argument_group('learning  parameters')
-    group.add_argument("-epochs",type=int,default=10,help="epochs to run")
-    group.add_argument("-batchsize",type=int,default=300,help="size of batch to train")
-    group.add_argument("-lr", type=float, default=0.001, help="learning rate")
-    group.add_argument("-iterations", type = int,default=-1,help="num of itrations in each epoch")
-
-    group = parser.add_argument_group('network structure')
-    group.add_argument("-layers",type=int,default=5,help="layers in network")
-    group.add_argument("-hidden",type=int,default=1000,help="hidden features in each layer")
+    group.add_argument("-batchsize",type=int,default=100,help="size of batch to train")
+    group.add_argument("-lr", type=float, default=0.5, help="learning rate")
 
     group = parser.add_argument_group('test parameters')
     group.add_argument("-testbatch",type=int,default=100,help="num of test samples")
@@ -91,49 +89,39 @@ def main():
     testbuff = Buffer(data[0],data[1])
 
     l1 = Linear(784,10)
-    #l2 = Linear(500,100)
-    #l3 = Linear(100,10)
 
-    activation1 = Sigmoid()
-    #activation2 = Sigmoid()
-    #activation3 = Sigmoid()
+    activation1 = Softmax()
 
-    mse = MSE()
+    losslayer = CrossEntropy()
 
     layers = [l1,activation1]
 
-    if args.iterations == -1:
-        iterations = buff.data.shape[0]//args.batchsize
-    else:
-        iterations = args.iterations
+    iterations = buff.data.shape[0]//args.batchsize
 
-    for i in range(args.epochs):
-        for j in range(iterations):
-            train,label = buff.draw(args.batchsize)
+    for j in range(iterations):
+        #img = (train/255.0).reshape(args.batchsize,-1)
+        train,label = buff.draw(args.batchsize)
+        train = (train/255.0).reshape(args.batchsize,-1)
+        img = train
+        tmp = l1.forward(img)
+        result = activation1.forward(tmp)
 
-            result = (train/255.0).reshape(args.batchsize,-1)
+        l = losslayer.forward(result,label)
+        l = l/args.batchsize
 
-            for layer in layers:
-                result = layer.forward(result)
+        label_p = np.argmax(result,axis=1)
+        label_t = np.argmax(label,axis=1)
+        ratio = np.sum(label_p == label_t)/label_t.shape[0]
 
-            l = mse.forward(result,label)
-            l = l/args.batchsize
+        print("iteration:",j,"/",iterations,"loss:",l,"ratio:",ratio)
 
-            label_p = np.argmax(result,axis=1)
-            label_t = np.argmax(label,axis=1)
-            ratio = np.sum(label_p == label_t)/label_t.shape[0]
+        delta = losslayer.backward(args.lr)
 
-            print("epoch:",i,"iteration:",j,"/",iterations,"loss:",l,"ratio:",ratio)
+        delta = activation1.backward(delta)
+        delta = l1.backward(delta)
 
-            delta = mse.backward(args.lr)
-
-            for layer in reversed(layers):
-                delta = layer.backward(delta)
-
-            for layer in layers:
-                if type(layer) == Linear:
-                    for no,parameter in enumerate(layer.parameters):
-                        parameter -= layer.parameters_deltas[no]
+        l1.parameters[0] = l1.parameters[0]-l1.parameters_deltas[0]
+        l1.parameters[1] = l1.parameters[1]-l1.parameters_deltas[1]
 
     test,label = testbuff.draw(args.testbatch)
 
@@ -146,7 +134,7 @@ def main():
     label_t = np.argmax(label,axis=1)
     ratio = np.sum(label_p == label_t)/label_t.shape[0]
 
-    l = mse.forward(result,label)/args.testbatch
+    l = losslayer.forward(result,label)/args.testbatch
 
     print(l)
     print(ratio)
