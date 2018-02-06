@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils import load_MNIST, download_MNIST
+from utils import load_MNIST
 from utils import Buffer
+import pdb
 
 
 class Sigmoid(object):
@@ -51,9 +52,22 @@ class CrossEntropy(object):
         self.x = x
         logx = np.log(x)
         y = -l*logx
-        return y.sum()
+        return y.sum(-1)
+
     def backward(self,delta):
-        return -delta*1/self.x*self.l
+        return -delta[...,None]*1./self.x*self.l
+
+class Mean(object):
+    def __init__(self):
+        self.parameters = []
+        self.parameters_deltas = []
+
+    def forward(self,x):
+        self.x = x
+        return x.mean()
+
+    def backward(self,delta):
+        return delta*np.ones(self.x.shape)/np.prod(self.x.shape)
 
 class Linear(object):
     def __init__(self,input_shape,output_shape,mean = 0, variance = 0.1):
@@ -63,17 +77,13 @@ class Linear(object):
         self.x = x
         return np.matmul(x,self.parameters[0])+self.parameters[1]
     def backward(self,delta):
-        self.parameters_deltas[0] = self.x.T.dot(delta)/self.x.shape[0]
-        self.parameters_deltas[1] = np.sum(delta,0)/self.x.shape[0]
+        self.parameters_deltas[0] = self.x.T.dot(delta)
+        self.parameters_deltas[1] = np.sum(delta,0)
         return delta.dot(self.parameters[0].T)
-
-def normalization(data):
-    return (data+np.random.uniform(size=data.shape))/256.0
 
 def main():
     np.random.seed(42)
     import argparse
-    download_MNIST()
 
     parser = argparse.ArgumentParser(description='')
     group = parser.add_argument_group('learning  parameters')
@@ -93,6 +103,7 @@ def main():
     activation1 = Softmax()
 
     losslayer = CrossEntropy()
+    mean = Mean()
 
     layers = [l1,activation1]
 
@@ -107,7 +118,7 @@ def main():
         result = activation1.forward(tmp)
 
         l = losslayer.forward(result,label)
-        l = l/args.batchsize
+        l = mean.forward(l)
 
         label_p = np.argmax(result,axis=1)
         label_t = np.argmax(label,axis=1)
@@ -115,7 +126,8 @@ def main():
 
         print("iteration:",j,"/",iterations,"loss:",l,"ratio:",ratio)
 
-        delta = losslayer.backward(args.lr)
+        delta = mean.backward(args.lr)
+        delta = losslayer.backward(delta)
 
         delta = activation1.backward(delta)
         delta = l1.backward(delta)
@@ -139,7 +151,6 @@ def main():
     print(l)
     print(ratio)
 
-    import pdb
     pdb.set_trace()
 
 

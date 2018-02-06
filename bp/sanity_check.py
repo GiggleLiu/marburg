@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from bp import Sigmoid,MSE,Linear,CrossEntropy,Softmax
+from bp import Sigmoid,MSE,Linear,CrossEntropy,Softmax, Mean
 
 from utils import sanity_check
 
@@ -22,11 +22,16 @@ def test_MSE():
 
 def test_CrossEntropy():
     layer = CrossEntropy()
-    x = np.random.uniform(size=(2,2))
-    sanity_check(layer,x,np.ones(x.shape))
+    x = np.random.uniform(size=(5,10))
+    sanity_check(layer,x,np.ones(x.shape), precision=1e-1)
 
 def test_Softmax():
     layer = Softmax()
+    x = np.random.uniform(size=(5,10))
+    sanity_check(layer,x)
+
+def test_Mean():
+    layer = Mean()
     x = np.random.uniform(size=(2,2))
     sanity_check(layer,x)
 
@@ -35,6 +40,8 @@ def main():
     test_MSE()
     test_Sigmoid()
     test_Softmax()
+    test_CrossEntropy()
+    test_Mean()
 
 if __name__ == "__main__":
     main()

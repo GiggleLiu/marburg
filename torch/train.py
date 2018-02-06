@@ -7,7 +7,7 @@ import torch, time
 import matplotlib.pyplot as plt
 import pdb
 
-from hamiltonians import heisenberg_loc
+from hamiltonians import heisenberg_loc, J1J2_loc
 from rbm_torch import RBM
 from vmc import vmc_measure
 from profilehooks import profile
@@ -130,14 +130,13 @@ class VMCKernel(object):
         #if is_cuda: config = config.cuda()
         return config
 
-@profile
 def run_demo():
     seed = 10086
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
     max_iter = 200
-    num_spin = 64
+    num_spin = 8
     num_hidden = 50
 
     # visualize the loss history
@@ -148,8 +147,6 @@ def run_demo():
         plt.errorbar(np.arange(1, len(energy_list) + 1), energy_list, yerr=precision_list)
 
     rbm = RBM(num_spin, num_hidden)
-    #from random_ansatz import ModifiedBetheAnsatz
-    #rbm = ModifiedBetheAnsatz(num_spin, 20, num_hidden)
     model = VMCKernel(heisenberg_loc, ansatz=rbm)
 
     E_exact = -3.65109341
@@ -164,5 +161,38 @@ def run_demo():
         if i >= max_iter:
             break
 
+def run_solution():
+    seed = 10086
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    max_iter = 200
+    num_spin = 20
+    num_hidden = 4
+    J2 = 0.0
+
+    # visualize the loss history
+    energy_list, precision_list = [], []
+    def _update_curve(energy, precision):
+        energy_list.append(energy)
+        precision_list.append(precision)
+        plt.errorbar(np.arange(1, len(energy_list) + 1), energy_list, yerr=precision_list)
+
+    from bethe_ansatz import ModifiedBetheAnsatz
+    bethe = ModifiedBetheAnsatz(num_spin, 1, num_hidden)
+    model = VMCKernel(lambda a,b,c: J1J2_loc(a,b,c,1,1,J2,J2,True), ansatz=bethe)
+
+    E_exact = -8.90439
+    t0 = time.time()
+    for i, (energy, precision) in enumerate(train(model, learning_rate = 0.1, use_cuda = False)):
+        t1 = time.time()
+        print('Step %d, dE/|E| = %.4f, elapse = %.4f' % (i, -(energy - E_exact)/E_exact, t1-t0))
+        _update_curve(energy, precision)
+        t0 = time.time()
+
+        # stop condition
+        if i >= max_iter:
+            break
+
 if __name__ == '__main__':
-    run_demo()
+    run_solution()

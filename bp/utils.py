@@ -3,31 +3,7 @@ import matplotlib.pyplot as plt
 
 import struct
 import subprocess
-import os
-
-def unpack(filename):
-    with open(filename,'rb') as f:
-        _,_, dims = struct.unpack('>HBB',f.read(4))
-        shape = tuple(struct.unpack('>I', f.read(4))[0] for d in range(dims))
-        data = np.fromstring(f.read(), dtype=np.uint8).reshape(shape)
-        return data
-
-def load_MNIST():
-    path = "../data/raw/"
-    files = ['t10k-images-idx3-ubyte','t10k-labels-idx1-ubyte','train-images-idx3-ubyte','train-labels-idx1-ubyte']
-    data = []
-    for name in files:
-        name = path+name
-        data.append(unpack(name))
-    labels = np.zeros([data[1].shape[0],10])
-    for i,iterm in enumerate(data[1]):
-        labels[i][iterm] = 1
-    data[1] = labels
-    labels = np.zeros([data[3].shape[0],10])
-    for i,iterm in enumerate(data[3]):
-        labels[i][iterm] = 1
-    data[3] = labels
-    return data
+import os, pdb
 
 def numdiff(layer, x, var, dy, delta, args):
     '''numerical differenciation.'''
@@ -66,7 +42,7 @@ def sanity_check(layer, x, *args, delta=0.01, precision=1e-3):
         x_delta_num = numdiff(layer, x, var, dy, delta, args)
         assert(np.all(abs(x_delta_num.reshape(*var_delta.shape) - var_delta) < precision))
 
-def download_MNIST():
+def load_MNIST():
     base = "http://yann.lecun.com/exdb/mnist/"
     objects = ['t10k-images-idx3-ubyte','t10k-labels-idx1-ubyte','train-images-idx3-ubyte','train-labels-idx1-ubyte']
     end = ".gz"
@@ -79,6 +55,30 @@ def download_MNIST():
             subprocess.check_call(cmd)
             cmd = ["gzip","-d",path+obj+end]
             subprocess.check_call(cmd)
+
+    def unpack(filename):
+        '''unpack a single file.'''
+        with open(filename,'rb') as f:
+            _, _, dims = struct.unpack('>HBB',f.read(4))
+            shape = tuple(struct.unpack('>I', f.read(4))[0] for d in range(dims))
+            data = np.fromstring(f.read(), dtype=np.uint8).reshape(shape)
+            return data
+
+    # load objects
+    data = []
+    for name in objects:
+        name = path+name
+        data.append(unpack(name))
+    labels = np.zeros([data[1].shape[0],10])
+    for i,iterm in enumerate(data[1]):
+        labels[i][iterm] = 1
+    data[1] = labels
+    labels = np.zeros([data[3].shape[0],10])
+    for i,iterm in enumerate(data[3]):
+        labels[i][iterm] = 1
+    data[3] = labels
+    return data
+
 
 class Buffer(object):
     def __init__(self,data,label):

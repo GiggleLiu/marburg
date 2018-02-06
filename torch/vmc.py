@@ -36,7 +36,7 @@ def vmc_measure(model, initial_config, num_bath=200, num_sample=1000, num_bin=50
         prob_proposed = model.prob(config_proposed)
 
         # accept/reject a move by metropolis algorithm (world's most famous single line algorithm)
-        if np.random.random() < prob_proposed / prob:
+        if np.random.random() < prob_proposed / max(prob, 1e-15):
             config = config_proposed
             prob = prob_proposed
             n_accepted += 1

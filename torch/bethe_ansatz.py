@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+from rbm_torch import RBM
 
 class ModifiedBetheAnsatz(nn.Module):
     '''
@@ -21,11 +22,12 @@ class ModifiedBetheAnsatz(nn.Module):
         super(ModifiedBetheAnsatz, self).__init__()
         self.num_visible = num_visible
         self.W = nn.Parameter(torch.randn(num_term, num_visible) * 1e-1)
-        self.V = nn.Parameter(torch.randn(num_term, num_visible) * 1e-1)
-        self.F1 = nn.Parameter(torch.randn(num_hidden, num_visible) * 1e-1)
-        self.F2 = nn.Parameter(torch.randn(num_term, num_hidden) * 1e-1)
-        self.b1 = nn.Parameter(torch.randn(num_hidden) * 1e-1)
-        self.b2 = nn.Parameter(torch.randn(num_term) * 1e-1)
+        #self.V = nn.Parameter(torch.randn(num_term, num_visible) * 1e-1)
+        #self.F1 = nn.Parameter(torch.randn(num_hidden, num_visible) * 1e-1)
+        #self.F2 = nn.Parameter(torch.randn(num_term, num_hidden) * 1e-1)
+        self.b1 = nn.Parameter(torch.randn(num_term) * 1e-1)
+        #self.b2 = nn.Parameter(torch.randn(num_term) * 1e-1)
+        self.rbm = RBM(num_visible, num_hidden)
 
     def f(self, v):
         return F.relu(self.F2.mv(F.relu(self.F1.mv(v)+self.b1))+self.b2)
@@ -40,9 +42,9 @@ class ModifiedBetheAnsatz(nn.Module):
         Return:
             float: the probability of v.
         '''
-        v = Variable(v.float())
-        if self.W.is_cuda: v = v.cuda(async=True)
-        return (self.W.mv(v).cos()*self.V.mv(v).exp()*self.f(v)).sum()
+        v_ = Variable(v.float())
+        if self.W.is_cuda: v_ = v_.cuda()
+        return (self.W.mv(v_)+self.b1).sin().sum()*self.rbm.prob_visible(v)
 
 if __name__ == '__main__':
     wf = ModifiedBetheAnsatz(8, 20, 20)

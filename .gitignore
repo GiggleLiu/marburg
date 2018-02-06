@@ -20,3 +20,4 @@ dist/
 *.mod
 .cache/
 graphs/
+*.ipynb_checkpoints/

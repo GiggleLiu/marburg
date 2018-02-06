@@ -90,7 +90,7 @@ class RBM(nn.Module):
             float: the probability of v.
         '''
         v = Variable(v.float())
-        if self.W.is_cuda: v = v.cuda(async=True)
+        if self.W.is_cuda: v = v.cuda()
         return (2 * (self.W.mv(v) + self.h_bias).cosh()).prod() * (self.v_bias.dot(v)).exp()
 
 def mnist_train(use_cuda, network_file):
@@ -101,7 +101,7 @@ def mnist_train(use_cuda, network_file):
     num_hidden = 500
 
     rbm = RBM(num_visible, num_hidden)
-    if use_cuda: rbm = rbm.cuda(async=True)
+    if use_cuda: rbm = rbm.cuda()
     loader = mnist01_loader(True, use_cuda, batch_size=64)
 
     train_op = torch.optim.SGD(rbm.parameters(), 0.1)
