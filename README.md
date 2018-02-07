@@ -10,6 +10,8 @@ We have prepaired four examples
 
 ## Preparations
 We prepaired both local and online accesses to our python notebooks.
+You use **either** of them to catch up our hands on session.
+
 If you are not using an Nvidia GPU or its driver are not properly configured, online access is recommended,
 otherwise you may loss some fun in this session.
 
@@ -34,5 +36,5 @@ Online means you can try CUDA programming without having an local NVIDIA GPU.
     - search "Colaboratory" and "CONNECT"
 3. Open the following online notebook link
     https://drive.google.com/file/d/1MLcG21zqSU9AvbY4siD4NqqbB2uwP2p2/view?usp=sharing
-4. Setup GPU following above notebook
+4. Setup GPU following instructions in above notebook
 5. You can make a copy of notebook to your google drive (File Menu) to save your edits.
