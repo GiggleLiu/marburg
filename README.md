@@ -9,8 +9,7 @@ We have prepaired four examples
   They have been uploaded to both Google drive and github.
 
 ## Preparations
-We prepaired both local and online accesses to our python notebooks.
-You may use **either** of them to catch up our hands on session.
+You may use **either** local or online accesses to our python notebooks.
 
 If you are not using an Nvidia GPU or its driver are not properly configured, online access is recommended,
 otherwise you may loss some fun in this session.
