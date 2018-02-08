@@ -1,12 +1,14 @@
-# Deep Learning and Quantum Many Body Systems - Hands on Session
+# Deep Learning and Quantum Many-Body Physics - Hands on Session
 
 ## Table of Contents
 We have prepaired four examples
 * Computation Graphs and Back Propagation
-* RealNVP for Sampling tasks
-* Restricted Boltzmann Machine (RBM) as a Generative Model
-* RBM as a Quantum Wave Function Ansatz
-  They have been uploaded to both Google drive and github.
+* [RealNVP](https://arxiv.org/abs/1605.08803) network for sampling
+* Restricted Boltzmann Machine for image restoration
+
+* Deep Neural Network as a Quantum Wave Function Ansatz
+
+They have been uploaded to both Google drive and Github repository. Have fun! 
 
 ## Preparations
 You may use **either** local or online accesses to our python notebooks.
@@ -16,12 +18,12 @@ otherwise you may loss some fun in this session.
 
 ### Local
 Set up your python environment
-* python 3.6/2.7
+* python 3.6/2.7 (python3 recommended)
 * install python libraries **numpy**, **matplotlib** and **ipython**
 ```bash
 pip install numpy matplotlib ipython
 ```
-* install pytorch with CUDA-8.0 support following [installation guide](http://pytorch.org/).
+* install PyTorch with CUDA-8.0 support following [installation guide](http://pytorch.org/).
 
 clone this repository https://github.com/GiggleLiu/marburg.git to your local host.
 
@@ -38,7 +40,7 @@ Online means you can try CUDA programming without having an local NVIDIA GPU.
 4. Setup GPU following instructions in above notebook
 5. You can make a copy of notebook to your google drive (File Menu) to save your edits.
 
-## Authors List
-* JinGuo Liu (cacate0129@iphy.ac.cn)
-* ShuoHui Li
-* Lei Wang
+## Authors
+* Jin-Guo Liu <cacate0129@iphy.ac.cn>
+* Shuo-Hui Li <contact_lish@iphy.ac.cn>
+* Lei Wang <wanglei@iphy.ac.cn>
