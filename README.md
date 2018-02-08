@@ -18,7 +18,7 @@ otherwise you may loss some fun in this session.
 
 ### Local
 Set up your python environment
-* python 3.6/2.7 (python3 recommended)
+* python 3.6
 * install python libraries **numpy**, **matplotlib** and **ipython**
 ```bash
 pip install numpy matplotlib ipython
