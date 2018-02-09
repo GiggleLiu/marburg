@@ -28,6 +28,7 @@ pip install numpy matplotlib ipython
 * install PyTorch following [installation guide](http://pytorch.org/).
     * select CUDA 8 if you have an Nvidia GPU with properly configured driver
     * select CUDA None if your don't
+* check your installation by typing `ipython notebook env_test.ipynb` and run the test script.
 
 clone this repository https://github.com/GiggleLiu/marburg.git to your local host.
 
