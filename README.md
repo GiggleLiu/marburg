@@ -17,13 +17,17 @@ If you are not using an Nvidia GPU or its driver are not properly configured, on
 otherwise you may loss some fun in this session.
 
 ### Local
+Requires a Linux or OSX operating system (required by pytorch).
+
 Set up your python environment
 * python 3.6
 * install python libraries **numpy**, **matplotlib** and **ipython**
 ```bash
 pip install numpy matplotlib ipython
 ```
-* install PyTorch with CUDA-8.0 support following [installation guide](http://pytorch.org/).
+* install PyTorch following [installation guide](http://pytorch.org/).
+    * select CUDA 8 if you have an Nvidia GPU with properly configured driver
+    * select CUDA None if your don't
 
 clone this repository https://github.com/GiggleLiu/marburg.git to your local host.
 
