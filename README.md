@@ -3,7 +3,7 @@
 ## Table of Contents
 We have prepaired four examples
 * Computation Graphs and Back Propagation
-* [RealNVP](https://arxiv.org/abs/1605.08803) network for sampling
+* Normalization flow for sampling
 * Restricted Boltzmann Machine for image restoration
 
 * Deep Neural Network as a Quantum Wave Function Ansatz
