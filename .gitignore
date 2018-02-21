@@ -15,6 +15,7 @@ output*
 *.dvi
 *.log
 *data/
+*data_torch/
 *build/
 dist/
 *.mod
