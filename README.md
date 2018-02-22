@@ -2,13 +2,12 @@
 
 ## Table of Contents
 We have prepaired four examples
-* Computation Graphs and Back Propagation
-* Normalization flow for sampling
-* Restricted Boltzmann Machine for image restoration
+* Computation Graphs and Back Propagation ([online](https://goo.gl/6d2sei), [solution](https://goo.gl/DZtidF))
+* Normalization flow for sampling ([online](https://goo.gl/8Caymh), [solution](https://goo.gl/FhAHRZ))
+* Restricted Boltzmann Machine for image restoration ([online](https://goo.gl/d7kPzy), [solution](https://goo.gl/VxYYQX))
+* Deep Neural Network as a Quantum Wave Function Ansatz ([online](https://goo.gl/vPFtdU))
 
-* Deep Neural Network as a Quantum Wave Function Ansatz
-
-They have been uploaded to both Google drive and Github repository. Have fun! 
+They have been uploaded to both Google drive and notebooks folder in this repository. Have fun! 
 
 ## Preparations
 You may use **either** local or online accesses to our python notebooks.
