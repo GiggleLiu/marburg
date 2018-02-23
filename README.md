@@ -44,6 +44,10 @@ Online means you can try CUDA programming without having an local NVIDIA GPU.
 4. Setup GPU following instructions in above notebook
 5. You can make a copy of notebook to your google drive (File Menu) to save your edits.
 
+## Documentations
+* lecture notes: *docs/LectureNoteonML.pdf*
+* hands on slides: *docs/ML-handson.pdf*
+
 ## Authors
 * Jin-Guo Liu <cacate0129@iphy.ac.cn>
 * Shuo-Hui Li <contact_lish@iphy.ac.cn>
