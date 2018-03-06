@@ -2,6 +2,7 @@
 
 ## Table of Contents
 We have prepaired four examples
+
 * Computation Graphs and Back Propagation ([online](https://goo.gl/6d2sei), [solution](https://goo.gl/DZtidF))
 * Normalization flow for sampling ([online](https://goo.gl/8Caymh), [solution](https://goo.gl/FhAHRZ))
 * Restricted Boltzmann Machine for image restoration ([online](https://goo.gl/d7kPzy), [solution](https://goo.gl/VxYYQX))
@@ -19,11 +20,14 @@ otherwise you may loss some fun in this session.
 Requires a Linux or OSX operating system (required by pytorch).
 
 Set up your python environment
+
 * python 3.6
 * install python libraries **numpy**, **matplotlib** and **ipython**
+
 ```bash
 pip install numpy matplotlib ipython
 ```
+
 * install PyTorch following [installation guide](http://pytorch.org/).
     * select CUDA 8 if you have an Nvidia GPU with properly configured driver
     * select CUDA None if your don't
@@ -33,6 +37,7 @@ Change directory to project home, check your installation by typing `ipython not
 
 ### Online
 Online means you can try CUDA programming without having an local NVIDIA GPU.
+
 1. Sign up and sign in [Google drive](https://drive.google.com/)
 2. Connect Google drive with [Google Colaboratory](https://colab.research.google.com)
     - right click on google drive page
@@ -45,10 +50,12 @@ Online means you can try CUDA programming without having an local NVIDIA GPU.
 5. You can make a copy of notebook to your google drive (File Menu) to save your edits.
 
 ## Documentations
+
 * lecture notes: *docs/LectureNoteonML.pdf*
 * hands on slides: *docs/ML-handson.pdf*
 
 ## Authors
+
 * Jin-Guo Liu <cacate0129@iphy.ac.cn>
 * Shuo-Hui Li <contact_lish@iphy.ac.cn>
 * Lei Wang <wanglei@iphy.ac.cn>
